@@ -1,8 +1,12 @@
+import React from 'react'
+import OtpLogin from '@/components/OtpLogin'
 
-export default function Home() {
+const page = () => {
   return (
-    <main>
-      Page
-    </main>
-  );
+    <div>
+      <OtpLogin />
+    </div>
+  )
 }
+
+export default page

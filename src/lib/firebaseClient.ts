@@ -1,35 +1,18 @@
-
-import { initializeApp, getApps } from "firebase/app";
-import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
-
-
+import { initializeApp, getApps, getApp } from "firebase/app";
+import {getAuth} from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
+  apiKey: "AIzaSyDJ7k4hGs1vdTfLWaFh7FIFcpvWlfjlP4Q",
+  authDomain: "apla-plot-717d7.firebaseapp.com",
+  projectId: "apla-plot-717d7",
+  storageBucket: "apla-plot-717d7.firebasestorage.app",
+  messagingSenderId: "918236516071",
+  appId: "1:918236516071:web:3a1dbdd883980d6d7b5c42",
+  measurementId: "G-D33WF1K631"
 };
 
+const app = getApps().length===0 ? initializeApp(firebaseConfig) : getApp();
+const auth = getAuth(app);
+auth.useDeviceLanguage();
 
-export const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-
-let verifier: RecaptchaVerifier | null = null;
-
-export async function getRecaptcha(containerId = "recaptcha-container") {
-  if (typeof window === "undefined") {
-    throw new Error("reCAPTCHA can only be initialized in the browser.");
-  }
-  if (!verifier) {
-    verifier = new RecaptchaVerifier(auth, containerId, { size: "invisible" });
-    await verifier.render();
-  }
-  return verifier;
-}
-
-export async function sendOtp(phone: string) {
-  const v = await getRecaptcha();
-  return signInWithPhoneNumber(auth, phone, v);
-}
+export { auth };
