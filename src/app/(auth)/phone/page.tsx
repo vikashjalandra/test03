@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { auth, sendOtp } from "@/lib/firebaseClient";
+import { ConfirmationResult } from "firebase/auth";
 
 export default function PhoneLoginPage() {
   const [phone, setPhone] = useState("+91");
   const [code, setCode] = useState("");
   const [step, setStep] = useState<"enter-phone" | "enter-otp">("enter-phone");
-  const [confirm, setConfirm] = useState<any>(null);
+  const [confirm, setConfirm] = useState<ConfirmationResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
 
@@ -19,9 +20,13 @@ export default function PhoneLoginPage() {
       setConfirm(confirmation);
       setStep("enter-otp");
       setMsg("OTP sent.");
-    } catch (e: any) {
-      console.error(e);
-      setMsg(e?.message || "Failed to send OTP");
+    } catch (e) {
+      if (e instanceof Error) {
+        console.error(e);
+        setMsg(e.message || "Failed to send OTP");
+      } else {
+        setMsg("Failed to send OTP");
+      }
     } finally {
       setLoading(false);
     }
@@ -47,9 +52,13 @@ export default function PhoneLoginPage() {
 
       setMsg("Logged in!");
       window.location.href = "/dashboard";
-    } catch (e: any) {
-      console.error(e);
-      setMsg(e?.message || "Verification failed");
+    } catch (e) {
+      if (e instanceof Error) {
+        console.error(e);
+        setMsg(e.message || "Verification failed");
+      } else {
+        setMsg("Verification failed");
+      }
     } finally {
       setLoading(false);
     }

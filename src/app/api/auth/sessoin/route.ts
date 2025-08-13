@@ -29,7 +29,10 @@ export async function POST(req: NextRequest) {
       maxAge: expiresIn / 1000,
     });
     return res;
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message || "Invalid token" }, { status: 401 });
+  } catch (e) {
+    if (e instanceof Error) {
+      return NextResponse.json({ error: e.message || "Invalid token" }, { status: 401 });
+    }
+    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 }

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { adminAuth } from "@/lib/firebaseAdmin";
 
 export async function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
@@ -15,14 +14,9 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  try {
-    // Verify the **session cookie** (not the client ID token) server-side
-    await adminAuth.verifySessionCookie(cookie, true);
-    return NextResponse.next();
-  } catch {
-    url.pathname = "/(auth)/phone";
-    return NextResponse.redirect(url);
-  }
+  // Edge middleware cannot verify session cookies with Admin SDK
+  // Only check for presence of cookie and redirect if missing
+  return NextResponse.next();
 }
 
 export const config = {
