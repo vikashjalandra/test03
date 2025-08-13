@@ -2,13 +2,13 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import {getAuth} from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDJ7k4hGs1vdTfLWaFh7FIFcpvWlfjlP4Q",
-  authDomain: "apla-plot-717d7.firebaseapp.com",
-  projectId: "apla-plot-717d7",
-  storageBucket: "apla-plot-717d7.firebasestorage.app",
-  messagingSenderId: "918236516071",
-  appId: "1:918236516071:web:3a1dbdd883980d6d7b5c42",
-  measurementId: "G-D33WF1K631"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
 const app = getApps().length===0 ? initializeApp(firebaseConfig) : getApp();
