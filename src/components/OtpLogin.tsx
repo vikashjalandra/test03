@@ -1,6 +1,6 @@
 'use client'
 import { auth } from '@/lib/firebaseClient';
-import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
+import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
 import React, { useEffect } from 'react'
 
 function OtpLogin() {
@@ -11,30 +11,46 @@ function OtpLogin() {
     const [success, setSuccess] = React.useState('');
     const [resendCount, setResendCount] = React.useState(0);
 
-    const [recaptchaVerifier, setRecaptchaVerifier] = React.useState(null);
+    const recaptchaRef = React.useRef<RecaptchaVerifier | null>(null);
 
     useEffect(() => {
-        const recaptchaVerifier = new RecaptchaVerifier(
-            auth, "recaptcha-container", {
-            size: "invisible",
+        if (typeof window !== 'undefined' && !recaptchaRef.current) {
+            recaptchaRef.current = new RecaptchaVerifier(
+                auth,
+                'recaptcha-container',
+                {
+                    size: 'invisible',
+                    callback: (response: any) => {
+                        // reCAPTCHA solved
+                    },
+                },
+                
+            );
+            recaptchaRef.current.render();
         }
-        )
-        setRecaptchaVerifier(recaptchaVerifier);
     }, []);
 
     const handleSubmit = async (e?: React.FormEvent) => {
         e?.preventDefault();
+        setError('');
+        setSuccess('');
 
-        try {
-            console.log('Sending OTP to:', phoneNumber);
-            const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
-            console.log('OTP sent successfully', confirmationResult);
-            setSuccess('OTP sent successfully');
-        } catch (error) {
-            console.error('Error sending OTP:', error);
-            setError('Failed to send OTP');
+        // Basic phone number validation (E.164 format)
+        const phoneRegex = /^\+[1-9]\d{1,14}$/;
+        if (!phoneRegex.test(phoneNumber)) {
+            setError('Please enter a valid phone number in E.164 format, e.g. +919876543210');
+            return;
         }
 
+        try {
+            if (!recaptchaRef.current) throw new Error('reCAPTCHA not initialized');
+            const confirmationResult: ConfirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaRef.current);
+            setIsOtpSent(true);
+            setSuccess('OTP sent successfully');
+        } catch (error: any) {
+            console.error('Error sending OTP:', error);
+            setError(error?.message || 'Failed to send OTP');
+        }
     }
 
     return (
