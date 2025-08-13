@@ -40,7 +40,8 @@ function OtpLogin() {
 
         try {
             if (!recaptchaRef.current) throw new Error('reCAPTCHA not initialized');
-            await signInWithPhoneNumber(auth, phoneNumber, recaptchaRef.current);
+            const response =await signInWithPhoneNumber(auth, phoneNumber, recaptchaRef.current);
+            console.log('OTP sent successfully:', response);
             setSuccess('OTP sent successfully');
         } catch (error) {
             const errMsg = (error && typeof error === 'object' && 'message' in error) ? (error as { message?: string }).message : undefined;
