@@ -1,16 +1,12 @@
 'use client'
 import { auth } from '@/lib/firebaseClient';
-import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
-import React, { useEffect } from 'react'
+import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
+import React, { useEffect } from 'react';
 
 function OtpLogin() {
     const [phoneNumber, setPhoneNumber] = React.useState('');
-    const [otp, setOtp] = React.useState('');
-    const [isOtpSent, setIsOtpSent] = React.useState(false);
     const [error, setError] = React.useState('');
     const [success, setSuccess] = React.useState('');
-    const [resendCount, setResendCount] = React.useState(0);
-
     const recaptchaRef = React.useRef<RecaptchaVerifier | null>(null);
 
     useEffect(() => {
@@ -20,7 +16,7 @@ function OtpLogin() {
                 'recaptcha-container',
                 {
                     size: 'invisible',
-                    callback: (response: any) => {
+                    callback: () => {
                         // reCAPTCHA solved
                     },
                 },
@@ -44,19 +40,18 @@ function OtpLogin() {
 
         try {
             if (!recaptchaRef.current) throw new Error('reCAPTCHA not initialized');
-            const confirmationResult: ConfirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaRef.current);
-            setIsOtpSent(true);
+            await signInWithPhoneNumber(auth, phoneNumber, recaptchaRef.current);
             setSuccess('OTP sent successfully');
-        } catch (error: any) {
+        } catch (error) {
+            const errMsg = (error && typeof error === 'object' && 'message' in error) ? (error as { message?: string }).message : undefined;
             console.error('Error sending OTP:', error);
-            setError(error?.message || 'Failed to send OTP');
+            setError(errMsg || 'Failed to send OTP');
         }
-    }
+    };
 
     return (
         <div>
             <h1>OTP Login</h1>
-
             <form onSubmit={handleSubmit}>
                 <input
                     type="text"
@@ -66,18 +61,13 @@ function OtpLogin() {
                 />
                 <button type="submit">Send OTP</button>
             </form>
-
             <div>
                 {error && <p style={{ color: 'red' }}>{error}</p>}
                 {success && <p style={{ color: 'green' }}>{success}</p>}
             </div>
-
-
             <div id="recaptcha-container" />
-
-
         </div>
-    )
+    );
 }
 
-export default OtpLogin
+export default OtpLogin;
