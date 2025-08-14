@@ -11,7 +11,9 @@ export async function POST(req: NextRequest) {
     }
     // Verify the Firebase ID token
     const decodedToken = await adminAuth.verifyIdToken(idToken);
-    return NextResponse.json({ uid: decodedToken.uid, email: decodedToken.email, phone_number: decodedToken.phone_number });
+    return NextResponse.json({
+        decodedToken
+    })
   } catch (error) {
     const errMsg = (error && typeof error === 'object' && 'message' in error) ? (error as { message?: string }).message : undefined;
     return NextResponse.json({ error: errMsg || "Invalid token" }, { status: 401 });
