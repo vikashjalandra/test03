@@ -69,20 +69,9 @@ function OtpLogin() {
         }
         try {
             const userCred = await confirmationResult.confirm(otpInput);
+            console.log('OTP verified successfully:', userCred);
             const idToken = await userCred.user.getIdToken();
-            // Call backend to verify
-            const res = await fetch('/api/auth/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ idToken }),
-            });
-            const data = await res.json();
-            if (res.ok) {
-                setUserInfo(data);
-                setSuccess('OTP verified and user authenticated!');
-            } else {
-                setError(data.error || 'Verification failed');
-            }
+            console.log('User ID Token:', idToken);
         } catch (error) {
             const errMsg = (error && typeof error === 'object' && 'message' in error) ? (error as { message?: string }).message : undefined;
             console.error('Error verifying OTP:', error);
