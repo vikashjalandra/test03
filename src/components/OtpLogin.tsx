@@ -1,5 +1,6 @@
 'use client'
 import { auth } from '@/lib/firebaseClient';
+import axios from 'axios';
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
 import React, { useEffect } from 'react';
 
@@ -10,6 +11,7 @@ function OtpLogin() {
     const [confirmationResult, setConfirmationResult] = React.useState<ConfirmationResult | null>(null);
     const [otpInput, setOtpInput] = React.useState('');
     const [userInfo, setUserInfo] = React.useState<{ uid?: string; email?: string; phone_number?: string } | null>(null);
+    const [idToken, setIdToken] = React.useState('');
     const recaptchaRef = React.useRef<RecaptchaVerifier | null>(null);
 
     useEffect(() => {
@@ -69,13 +71,37 @@ function OtpLogin() {
         }
         try {
             const userCred = await confirmationResult.confirm(otpInput);
-            console.log('OTP verified successfully:', userCred);
-            const idToken = await userCred.user.getIdToken();
-            console.log('User ID Token:', idToken);
+            const token = await userCred.user.getIdToken();
+            setIdToken(token);
+            setSuccess('OTP verified successfully. You can now verify authentication.');
         } catch (error) {
             const errMsg = (error && typeof error === 'object' && 'message' in error) ? (error as { message?: string }).message : undefined;
             console.error('Error verifying OTP:', error);
             setError(errMsg || 'Failed to verify OTP');
+        }
+    };
+
+    const handleVerifyAuth = async (e?: React.FormEvent) => {
+        e?.preventDefault();
+        setError('');
+        setSuccess('');
+        setUserInfo(null);
+        if (!idToken) {
+            setError('Please enter the ID token.');
+            return;
+        }
+        try {
+            const response = await axios.post('/api/auth/verify', { idToken });
+            if (response.status === 200) {
+                setUserInfo(response.data);
+                setSuccess('User verified successfully');
+            } else {
+                setError(response.data.error || 'Failed to verify user');
+            }
+        } catch (error) {
+            const errMsg = (error && typeof error === 'object' && 'message' in error) ? (error as { message?: string }).message : undefined;
+            console.error('Error verifying user:', error);
+            setError(errMsg || 'Failed to verify user');
         }
     };
 
@@ -111,6 +137,19 @@ function OtpLogin() {
                         <pre>{JSON.stringify(userInfo, null, 2)}</pre>
                     </div>
                 )}
+            </div>
+
+            <div>
+                <h2>Verify Auth</h2>
+                <form onSubmit={handleVerifyAuth}>
+                    <input
+                        type="text"
+                        placeholder="Enter ID Token"
+                        value={idToken}
+                        onChange={(e) => setIdToken(e.target.value)}
+                    />
+                    <button type="submit">Verify</button>
+                </form>
             </div>
             <div id="recaptcha-container" />
         </div>

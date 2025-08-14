@@ -6,11 +6,13 @@ export const runtime = "nodejs";
 export async function POST(req: NextRequest) {
   try {
     const { idToken } = await req.json();
+    console.log('Received ID Token:', idToken);
     if (!idToken) {
       return NextResponse.json({ error: "Missing idToken" }, { status: 400 });
     }
     // Verify the Firebase ID token
     const decodedToken = await adminAuth.verifyIdToken(idToken);
+    console.log('Decoded Token:', decodedToken);
     return NextResponse.json({
         decodedToken
     })
